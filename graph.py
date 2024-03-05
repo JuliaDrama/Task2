@@ -1,13 +1,15 @@
 from matplotlib import pyplot as plt
 
 
-def create_graph(x_standart, y, x_valid, y_pred):
+def create_graph(x, y_standart, x_valid, y_pred):
     """
     Функция создает точечный графикс с фактическими значениями и линию регрессии?.
 
     Parameters
     ----------
-    x_standart : ndarray
+    x : ndarray
+        Этот параметр содержит данные
+    y_standart:
         Этот параметр содержит стандартизированные данные
     x_valid :
         Этот параметр содержит валидационные данные
@@ -25,7 +27,7 @@ def create_graph(x_standart, y, x_valid, y_pred):
     plt.figure(figsize=figure_size)
 
     # Зависимость целевого столбца от конкретного столбца x1 (точечный график)
-    plt.scatter(x_standart, y, s=point_size)
+    plt.scatter(x, y_standart, s=point_size)
 
     # Линейная регрессия
     plt.plot(x_valid, y_pred, "r")

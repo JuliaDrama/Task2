@@ -32,29 +32,29 @@ def process_data(dataframe: pd.DataFrame) -> tuple:
     x = pd.to_datetime(dataframe['time'], format='%H:%M:%S')
     x = ((x.dt.hour * 60+x.dt.minute)
          * 60 + x.dt.second).to_frame()
-
+    x['time'] =x['time'].astype (int)
     return x, y
 
 
-def make_standard(x: pd.DataFrame) -> np.ndarray:
+def make_standard(y_data: pd.DataFrame) -> np.ndarray:
     """
     Функция стандартизирует данные.
 
     Parameters
     ----------
-    x : DataFrame
+    y_data : DataFrame
         Этот параметр является объектом класса библиотеки Pandas.
 
     Returns
     -------
-    x : ndarray  
+     : ndarray  
         Стандартизированные данные, представленные в виде массива NumPy.
     """
-    sc = StandardScaler()  # Создание объекта стандартизатора
 
-    # Применение стандартизации к признакам X и сохранение результата в X_c
-    x_c = sc.fit_transform(x)
-    return x_c
+    # Применение стандартизации к y и сохранение результата в y_c
+
+    y_c = (y_data - y_data.min()) / (y_data.max() - y_data.min())
+    return y_c
 
 
 def create_model(x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray) -> np.ndarray:
@@ -82,13 +82,13 @@ def create_model(x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray) 
     return y_predicted
 
 
-def compute_model(x_standart: pd.DataFrame, y: pd.Series, x_valid):
+def compute_model(df: pd.DataFrame, x_valid):
     """
     Функция вычисляет модель методом наименьших квадратов, обучает её и возвращает предсказанные данные.
 
     Parameters
     ----------
-    x_standart : DataFrame
+    x : DataFrame
         Этот параметр содержит данные для вычисления модели.
     y : Series
         Этот параметр содержит целевые значения для данных.
@@ -100,14 +100,16 @@ def compute_model(x_standart: pd.DataFrame, y: pd.Series, x_valid):
     y_predicted : ndarray  
         Предсказанные данные, представленные в виде массива NumPy
     """
-    y_array = np.array(y)  # Приведение в тип данных массив
-    x_mean = np.mean(x_standart)
-    y_mean = np.mean(y_array)
-    sqrt_x_array = np.array([x_i ** 2 for x_i in x_standart])
-    mean_sqrt_x = np.mean(sqrt_x_array)
-    prod_x_y = np.array([x_i * y_i for x_i, y_i in zip(x_standart, y_array)])
+    x = df['time']
+    y_standart = df['count_messages']
+    x_mean = np.mean(x)
+    y_mean = np.mean(y_standart)
+    sqrt_x = x ** 2
+    mean_sqrt_x = np.mean(sqrt_x)
+    prod_x_y = (x * y_standart)
     mean_prod_x_y = np.mean(prod_x_y)
     b = (y_mean * x_mean - mean_prod_x_y) / (x_mean ** 2 - mean_sqrt_x)
     a = y_mean - b * x_mean
-    y_predicted = np.array([a + b * x for x in x_valid])
+    y_predicted = x_valid * b + a
     return y_predicted
+
